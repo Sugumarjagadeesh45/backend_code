@@ -1,0 +1,7 @@
+tunnel: enna-tunnel
+credentials-file: C:\Users\webas\.cloudflared\89485dbe-7a4c-4d7a-a38b-9be65dcfbcb7.json
+
+ingress:
+  - hostname: api.yourdomain.com   # Backend-ku subdomain
+    service: http://localhost:5001  # Unga backend port
+  - service: http_status:404

@@ -1,0 +1,8 @@
+{
+  "driverId": "DRV001",
+  "name": "Raja",
+  "phone": "9876543210",
+  "password": "pass123",
+  "vehicleType": "Car",
+  "location": "Chennai"
+}
