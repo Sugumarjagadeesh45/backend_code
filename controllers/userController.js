@@ -345,6 +345,17 @@ exports.bookRide = async (req, res) => {
       status: 'pending'
     });
     
+
+    const initialLiveLocation = new LiveLocation({
+    userId: req.user.id,
+    rideId: savedRide._id,
+    latitude: savedRide.pickupCoordinates.latitude,
+    longitude: savedRide.pickupCoordinates.longitude
+  });
+  await initialLiveLocation.save();
+  console.log('✅ Initial live location saved:', initialLiveLocation);
+
+  
     const savedRide = await newRide.save();
     console.log('✅ Ride booked successfully:', savedRide);
     
@@ -532,6 +543,60 @@ exports.updateUser = async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 };
+
+
+
+exports.saveLiveLocation = async (req, res) => {
+  try {
+    const { latitude, longitude, rideId } = req.body;
+    if (!latitude || !longitude || !rideId) {
+      console.log('❌ Missing latitude, longitude, or rideId in request');
+      return res.status(400).json({ error: 'Latitude, longitude, and rideId are required' });
+    }
+
+    console.log(`🌐 Saving live location for ride ${rideId}:`, { latitude, longitude, userId: req.user.id });
+
+    // Check if the ride exists and is active
+    const ride = await Ride.findOne({ _id: rideId, user: req.user.id, status: { $ne: 'completed' } });
+    if (!ride) {
+      console.log('❌ No active ride found for user:', req.user.id);
+      return res.status(404).json({ error: 'No active ride found' });
+    }
+
+    const newLiveLocation = new LiveLocation({ 
+      userId: req.user.id, 
+      rideId, 
+      latitude, 
+      longitude 
+    });
+
+    const savedLocation = await newLiveLocation.save();
+    console.log("✅ Live location saved to MongoDB:", savedLocation);
+
+    // Emit live location update to the driver via socket
+    const io = req.app.get('io');
+    if (io && ride.driverId) {
+      io.to(`driver_${ride.driverId}`).emit('userLiveLocationUpdate', {
+        rideId,
+        userId: req.user.id,
+        userLat: latitude,
+        userLng: longitude,
+        timestamp: savedLocation.timestamp
+      });
+      console.log(`📡 Sent live location to driver ${ride.driverId}`);
+    }
+
+    res.json({
+      message: 'Live location saved successfully',
+      location: savedLocation
+    });
+  } catch (err) {
+    console.error("❌ Error saving live location:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+
 
 // Delete user (new implementation)
 exports.deleteUser = async (req, res) => {

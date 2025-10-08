@@ -31,6 +31,9 @@ router.put('/ride/status', userController.updateRideStatus);
 
 router.put('/profile', upload.single('profilePicture'), userController.updateProfile);
 
+
+router.post('/live-location', userController.saveLiveLocation);
+
 // Profile Routes
 router.get('/me/profile', userController.getCurrentUserProfile);
 router.get('/me', userController.getProfile);
