@@ -1,6 +1,6 @@
 
 const Registration = require('../models/user/Registration');
-const Location = require('../models/user/location');
+const Location = require('../models/user/UserLocation');
 const Ride = require('../models/ride');
 const RaidId = require('../models/user/raidId');
 const jwt = require('jsonwebtoken');
@@ -104,10 +104,10 @@ exports.saveUserLocation = async (req, res) => {
     console.log("🌐 Frontend to received location code:", { latitude, longitude, userId: req.user.id });
     
     const newLocation = new Location({ 
-      latitude, 
-      longitude, 
-      userId: req.user.id 
-    });
+  latitude, 
+  longitude, 
+  userId: req.user.id 
+});
     
     const savedLocation = await newLocation.save();
     console.log("✅ Location saved to MongoDB:", savedLocation);
@@ -355,7 +355,7 @@ exports.bookRide = async (req, res) => {
   await initialLiveLocation.save();
   console.log('✅ Initial live location saved:', initialLiveLocation);
 
-  
+
     const savedRide = await newRide.save();
     console.log('✅ Ride booked successfully:', savedRide);
     
