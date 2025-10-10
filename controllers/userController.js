@@ -95,23 +95,28 @@ exports.authMiddleware = (req, res, next) => {
 
 exports.saveUserLocation = async (req, res) => {
   try {
-    const { latitude, longitude } = req.body;
+    const { latitude, longitude, rideId } = req.body;
     if (!latitude || !longitude) {
       console.log('❌ Missing latitude or longitude in request');
       return res.status(400).json({ error: 'Latitude and longitude are required' });
     }
     
-    console.log("🌐 Frontend to received location code:", { latitude, longitude, userId: req.user.id });
+    console.log("🌐 Frontend received location code:", { 
+      latitude, 
+      longitude, 
+      userId: req.user.id,
+      rideId 
+    });
     
     const newLocation = new Location({ 
-  latitude, 
-  longitude, 
-  userId: req.user.id 
-});
+      latitude, 
+      longitude, 
+      userId: req.user.id,
+      rideId: rideId || null
+    });
     
     const savedLocation = await newLocation.save();
     console.log("✅ Location saved to MongoDB:", savedLocation);
-    console.log("✅ Backend to send location code:", savedLocation);
     
     res.json({
       message: 'Location saved successfully',
